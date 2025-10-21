@@ -17,6 +17,9 @@ def ttl_cache(func: Callable, ttl: int = 30) -> Callable:
 
     @functools.wraps(func)
     def cached_func(*args: Any, **kwargs: Any) -> Any:
+        # right now, search doesn't take any arguments
+        # so I don't need to code any key generation
+        # mechanism
         key = "fixed"
         now = time.time()
 
