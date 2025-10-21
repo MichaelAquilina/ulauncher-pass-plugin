@@ -38,10 +38,13 @@ def ttl_cache(func: Callable, ttl: int = 30) -> Callable:
 
 
 def search(value: str) -> Iterable[str]:
-    value = value.lower()
+    def clean(v: str) -> str:
+        return v.lower().replace("/", "")
+
+    value = clean(value)
 
     for item in get_all_passwords():
-        if value in item.lower():
+        if value in clean(item):
             yield item
 
 
