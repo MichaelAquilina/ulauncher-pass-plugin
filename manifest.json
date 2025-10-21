@@ -1,0 +1,14 @@
+{
+    "required_api_version": "2",
+    "name": "Password Store",
+    "description": "Search your passwords efficiently",
+    "developer_name": "Michael Aquilina",
+    "icon": "images/icon.png",
+    "preferences": [{
+        "id": "pass_kw",
+        "type": "keyword",
+        "name": "Password Store",
+        "description": "Password Store Plugin",
+        "default_value": "p"
+    }]
+}
