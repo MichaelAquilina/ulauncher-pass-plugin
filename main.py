@@ -1,4 +1,5 @@
 import re
+import logging
 import os
 import time
 import functools
@@ -13,23 +14,26 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 
 
+logger = logging.getLogger(__name__)
+
+
 def ttl_cache(func: Callable, ttl: int = 30) -> Callable:
     cached_data: dict[str, tuple[float, Any]] = {}
 
     @functools.wraps(func)
     def cached_func(*args: Any, **kwargs: Any) -> Any:
-        # right now, search doesn't take any arguments
-        # so I don't need to code any key generation
-        # mechanism
-        key = "fixed"
+        key = "|".join(args)
+        key += "|".join(f"{k}={v}" for k, v in kwargs.items())
         now = time.time()
 
         if entry := cached_data.get(key):
             timestamp, value = entry
             if now - timestamp > ttl:
+                logger.debug("cache entry expired for: %s", key)
                 value = func(*args, **kwargs)
                 cached_data[key] = (now, value)
         else:
+            logger.debug("cache empty for: %s", key)
             value = func(*args, **kwargs)
             cached_data[key] = (now, value)
 
@@ -38,19 +42,19 @@ def ttl_cache(func: Callable, ttl: int = 30) -> Callable:
     return cached_func
 
 
-def search(value: str) -> Iterable[str]:
+def search(value: str, pass_location: str) -> Iterable[str]:
     tokens = re.split(r"[ \/]", value.lower())
 
-    for item in get_all_passwords():
+    for item in get_all_passwords(pass_location):
         search_item = item.lower()
         if all(token in search_item for token in tokens):
             yield item
 
 
 @ttl_cache
-def get_all_passwords() -> list[str]:
+def get_all_passwords(pass_location: str) -> list[str]:
     results = []
-    path = os.path.expanduser("~/.password-store")
+    path = os.path.expanduser(pass_location)
     for root, dirs, files in os.walk(path):
         relative_path = root.removeprefix(path)
         for file in files:
@@ -75,10 +79,23 @@ class KeywordQueryEventListener(EventListener):
         event: KeywordQueryEvent,
         extension: Extension,
     ) -> RenderResultListAction:
+        pass_location = extension.preferences["pass_location"]
+
+        try:
+            max_results_value = extension.preferences["max_results"]
+            max_results = int(max_results_value)
+        except ValueError:
+            # don't crash the entire extension if this is invalid
+            logger.error(
+                "Invalid value for max_results: %s",
+                max_results_value,
+            )
+            max_results = 5
+
         argument = event.get_argument() or ""
 
         results: list[ExtensionResultItem] = []
-        for entry in search(argument):
+        for entry in search(argument, pass_location):
             results.append(ExtensionResultItem(
                 icon="images/icon.png",
                 name=entry,
@@ -87,7 +104,7 @@ class KeywordQueryEventListener(EventListener):
                 # generating a string this way is definitely not ideal
                 on_enter=RunScriptAction(f"pass -c {entry}"),
             ))
-            if len(results) >= 5:
+            if len(results) >= max_results:
                 break
 
         return RenderResultListAction(results)

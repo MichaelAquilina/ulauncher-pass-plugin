@@ -4,11 +4,28 @@
     "description": "Search your passwords efficiently",
     "developer_name": "Michael Aquilina",
     "icon": "images/icon.png",
-    "preferences": [{
-        "id": "pass_kw",
-        "type": "keyword",
-        "name": "Password Store",
-        "description": "Password Store Plugin",
-        "default_value": "p"
-    }]
+    "options": {
+        "query_debounce": 0.02
+    },
+    "preferences": [
+        {
+            "id": "pass_kw",
+            "type": "keyword",
+            "name": "Password Store",
+            "description": "Password Store Plugin",
+            "default_value": "p"
+        },
+        {
+            "id": "pass_location",
+            "type": "input",
+            "name": "Password Store locaction",
+            "default_value": "~/.password-store"
+        },
+        {
+            "id": "max_results",
+            "type": "input",
+            "name": "Max number of results to show",
+            "default_value": "5"
+        }
+    ]
 }
