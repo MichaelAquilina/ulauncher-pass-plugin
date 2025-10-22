@@ -96,14 +96,16 @@ class KeywordQueryEventListener(EventListener):
 
         results: list[ExtensionResultItem] = []
         for entry in search(argument, pass_location):
-            results.append(ExtensionResultItem(
-                icon="images/icon.png",
-                name=entry,
-                description=entry,
-                # TODO: running with args does not seem to work
-                # generating a string this way is definitely not ideal
-                on_enter=RunScriptAction(f"pass -c {entry}"),
-            ))
+            results.append(
+                ExtensionResultItem(
+                    icon="images/icon.png",
+                    name=entry,
+                    description=entry,
+                    # TODO: running with args does not seem to work
+                    # generating a string this way is definitely not ideal
+                    on_enter=RunScriptAction(f"pass -c {entry}"),
+                )
+            )
             if len(results) >= max_results:
                 break
 
