@@ -1,3 +1,4 @@
+import re
 import os
 import time
 import functools
@@ -38,13 +39,11 @@ def ttl_cache(func: Callable, ttl: int = 30) -> Callable:
 
 
 def search(value: str) -> Iterable[str]:
-    def clean(v: str) -> str:
-        return v.lower().replace("/", "")
-
-    value = clean(value)
+    tokens = re.split(r"[ \/]", value.lower())
 
     for item in get_all_passwords():
-        if value in clean(item):
+        search_item = item.lower()
+        if all(token in search_item for token in tokens):
             yield item
 
 
