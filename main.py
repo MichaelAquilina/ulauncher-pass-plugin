@@ -106,6 +106,9 @@ class KeywordQueryEventListener(EventListener):
 def generate_password(
     argument: str,
 ) -> list[ExtensionResultItem]:
+    if not argument:
+        return []
+
     return [
         ExtensionResultItem(
             icon="images/generate.png",
