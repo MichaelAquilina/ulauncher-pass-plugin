@@ -15,10 +15,10 @@ from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 
 logger = logging.getLogger(__name__)
 
+cached_data: dict[str, tuple[float, Any]] = {}
+
 
 def ttl_cache(func: Callable, ttl: int = 30) -> Callable:
-    cached_data: dict[str, tuple[float, Any]] = {}
-
     @functools.wraps(func)
     def cached_func(*args: Any, **kwargs: Any) -> Any:
         key = "|".join(args)
@@ -108,8 +108,8 @@ def generate_password(
 ) -> list[ExtensionResultItem]:
     return [
         ExtensionResultItem(
-            icon="images/icon.png",
-            name=f"Generate {argument}",
+            icon="images/generate.png",
+            name=f"Generate password: {argument}",
             description=f"Generate a password for {argument}",
             on_enter=RunScriptAction(f"pass generate -c {argument}"),
         )
