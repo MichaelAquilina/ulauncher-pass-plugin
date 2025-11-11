@@ -9,11 +9,18 @@
     },
     "preferences": [
         {
-            "id": "pass_kw",
+            "id": "pass_search",
             "type": "keyword",
             "name": "Password Store",
             "description": "Password Store Plugin",
             "default_value": "p"
+        },
+        {
+            "id": "pass_generate",
+            "type": "keyword",
+            "name": "Generate Password",
+            "description": "Generate a password for the given path",
+            "default_value": "pg"
         },
         {
             "id": "pass_location",

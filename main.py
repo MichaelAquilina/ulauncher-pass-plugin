@@ -1,18 +1,17 @@
-import re
+import functools
 import logging
 import os
+import re
 import time
-import functools
-from typing import Callable, Any
 from collections.abc import Iterable
+from typing import Any, Callable
 
-from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
-from ulauncher.api.shared.event import KeywordQueryEvent
-from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+from ulauncher.api.client.Extension import Extension
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
-
+from ulauncher.api.shared.event import KeywordQueryEvent
+from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 
 logger = logging.getLogger(__name__)
 
@@ -93,23 +92,51 @@ class KeywordQueryEventListener(EventListener):
             max_results = 5
 
         argument = event.get_argument() or ""
+        keyword = event.get_keyword()
 
-        results: list[ExtensionResultItem] = []
-        for entry in search(argument, pass_location):
-            results.append(
-                ExtensionResultItem(
-                    icon="images/icon.png",
-                    name=entry,
-                    description=entry,
-                    # TODO: running with args does not seem to work
-                    # generating a string this way is definitely not ideal
-                    on_enter=RunScriptAction(f"pass -c {entry}"),
-                )
-            )
-            if len(results) >= max_results:
-                break
+        match keyword:
+            case "p":
+                results = get_search_results(argument, pass_location, max_results)
+            case "pg":
+                results = generate_password(argument)
 
         return RenderResultListAction(results)
+
+
+def generate_password(
+    argument: str,
+) -> list[ExtensionResultItem]:
+    return [
+        ExtensionResultItem(
+            icon="images/icon.png",
+            name=f"Generate {argument}",
+            description=f"Generate a password for {argument}",
+            on_enter=RunScriptAction(f"pass generate -c {argument}"),
+        )
+    ]
+
+
+def get_search_results(
+    argument: str,
+    pass_location: str,
+    max_results: int,
+) -> list[ExtensionResultItem]:
+    results: list[ExtensionResultItem] = []
+
+    for entry in search(argument, pass_location):
+        results.append(
+            ExtensionResultItem(
+                icon="images/icon.png",
+                name=entry,
+                description=entry,
+                # TODO: running with args does not seem to work
+                # generating a string this way is definitely not ideal
+                on_enter=RunScriptAction(f"pass -c {entry}"),
+            )
+        )
+        if len(results) >= max_results:
+            break
+    return results
 
 
 if __name__ == "__main__":
