@@ -66,6 +66,12 @@ def get_all_passwords(pass_location: str) -> list[str]:
     return results
 
 
+def _get_exec_path(filename: str) -> str:
+    pwd = os.path.dirname(os.path.realpath(__file__))
+    exec_path = f"{pwd}/{filename}"
+    return exec_path
+
+
 class PassExtension(Extension):
     def __init__(self) -> None:
         super().__init__()
@@ -109,14 +115,14 @@ def generate_password(
     if not argument:
         return []
 
+    exec_path = _get_exec_path("generate_and_notify.sh")
+
     return [
         ExtensionResultItem(
             icon="images/generate.png",
             name=f"Generate password: {argument}",
             description=f"Generate a password for {argument}",
-            on_enter=RunScriptAction(
-                f"pass generate -c {argument} && notify-send 'Password generated' 'Password for {argument} generated and copied to clipboard'"
-            ),
+            on_enter=RunScriptAction(f"{exec_path} {argument}"),
         )
     ]
 
@@ -127,6 +133,7 @@ def get_search_results(
     max_results: int,
 ) -> list[ExtensionResultItem]:
     results: list[ExtensionResultItem] = []
+    exec_path = _get_exec_path("copy_and_notify.sh")
 
     for entry in search(argument, pass_location):
         results.append(
@@ -136,9 +143,7 @@ def get_search_results(
                 description=entry,
                 # TODO: running with args does not seem to work
                 # generating a string this way is definitely not ideal
-                on_enter=RunScriptAction(
-                    f"pass -c {entry} && notify-send 'Password copied' 'Password for {entry} copied to clipboard'"
-                ),
+                on_enter=RunScriptAction(f"{exec_path} '{entry}'"),
             )
         )
         if len(results) >= max_results:
