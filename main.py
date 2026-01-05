@@ -136,7 +136,9 @@ def get_search_results(
                 description=entry,
                 # TODO: running with args does not seem to work
                 # generating a string this way is definitely not ideal
-                on_enter=RunScriptAction(f"pass -c {entry} && notify-send 'Password copied' 'Password for {entry} copied to clipboard'"),
+                on_enter=RunScriptAction(
+                    f"pass -c {entry} && notify-send 'Password copied' 'Password for {entry} copied to clipboard'"
+                ),
             )
         )
         if len(results) >= max_results:
