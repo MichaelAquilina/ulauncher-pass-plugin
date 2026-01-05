@@ -114,7 +114,9 @@ def generate_password(
             icon="images/generate.png",
             name=f"Generate password: {argument}",
             description=f"Generate a password for {argument}",
-            on_enter=RunScriptAction(f"pass generate -c {argument}"),
+            on_enter=RunScriptAction(
+                f"pass generate -c {argument} && notify-send 'Password generated' 'Password for {argument} generated and copied to clipboard'"
+            ),
         )
     ]
 
@@ -134,7 +136,7 @@ def get_search_results(
                 description=entry,
                 # TODO: running with args does not seem to work
                 # generating a string this way is definitely not ideal
-                on_enter=RunScriptAction(f"pass -c {entry}"),
+                on_enter=RunScriptAction(f"pass -c {entry} && notify-send 'Password copied' 'Password for {entry} copied to clipboard'"),
             )
         )
         if len(results) >= max_results:
