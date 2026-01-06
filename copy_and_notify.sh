@@ -2,6 +2,8 @@
 # Keep this on a separate line so that if GPG pass is cancelled
 # the rest of the script won't continue
 # TODO: is this a bug or expected behaviour on -e bash scripts?
+set -e
+
 entry="$1"
 password="$(pass "$entry")"
 
